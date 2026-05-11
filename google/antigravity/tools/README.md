@@ -60,6 +60,58 @@ results = await tool_runner.process_tool_calls(calls)
 print(results[0].result)
 ```
 
+## Tool Access Control: Disabling vs. Denying
+
+The SDK provides two distinct mechanisms for restricting which tools an agent
+can use. They operate at different levels and have different trade-offs:
+
+### Disabling tools (config-level)
+
+Use `CapabilitiesConfig.enabled_tools` or `CapabilitiesConfig.disabled_tools`
+to control which builtin tools the harness exposes to the model. A disabled
+tool is **removed from the model's context entirely** — the model never sees
+its definition, never considers calling it, and never wastes tokens on it.
+
+```python
+from google.antigravity.types import CapabilitiesConfig, BuiltinTools
+
+# Only expose read-only tools — the model can't even see write tools.
+config = LocalAgentConfig(
+    capabilities=CapabilitiesConfig(
+        enabled_tools=BuiltinTools.read_only(),
+    ),
+)
+```
+
+### Denying tools (policy-level)
+
+Use `policy.deny()` to reject specific tool calls at runtime via the hooks
+system. The tool **remains visible** in the model's context, but calls are
+rejected with a denial message. This allows the model to understand why access
+was refused, but each rejected call costs tokens.
+
+```python
+from google.antigravity.hooks.policy import deny, allow
+
+# The model sees run_command but can't use it for destructive operations.
+policies = [
+    deny("run_command",
+         when=lambda args: "rm" in args.get("CommandLine", "")),
+    allow("*"),
+]
+```
+
+### When to use which
+
+| Approach | Model sees the tool? | Token cost | Best for |
+|---|---|---|---|
+| `disabled_tools` / `enabled_tools` | No | None | Tools irrelevant to the agent's purpose |
+| `policy.deny()` | Yes | Wasted on failed calls | Conditional or argument-dependent restrictions |
+
+**Guideline**: Prefer `CapabilitiesConfig` to remove tools the agent should
+never need. Use policies for runtime guardrails where the decision depends on
+context, arguments, or user approval.
+
 ## Files
 
 - `tool_runner.py`: Defines `ToolRunner` and `ToolWithSchema`.

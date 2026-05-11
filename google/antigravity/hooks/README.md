@@ -226,6 +226,33 @@ policy.ask_user("run_command", handler=confirm_with_user)
 `enforce()` validates at construction time that all `ASK_USER` policies have
 handlers, failing fast with a `ValueError` if any are missing.
 
+### Disabling vs. Denying Tools
+
+There are two distinct mechanisms for restricting tool access, and they operate
+at different levels:
+
+| Mechanism | Where it acts | Model sees the tool? | Token cost | Best for |
+|---|---|---|---|---|
+| `CapabilitiesConfig.disabled_tools` / `enabled_tools` | Harness config (before model context is built) | **No** — tool is stripped entirely | None | Tools irrelevant to the agent's purpose |
+| `policy.deny()` | Hook layer (runtime, per-call) | **Yes** — tool remains in context | Wasted tokens on failed calls | Conditional or argument-dependent restrictions |
+
+**Disabling** a tool via `CapabilitiesConfig` removes it from the model's
+context entirely. The model never sees the tool definition, never considers
+calling it, and never wastes tokens on it. This is the right choice when a
+tool is simply not relevant to the agent's purpose (e.g., disabling
+`run_command` for a read-only research agent).
+
+**Denying** a tool via `policy.deny()` leaves the tool visible in the model's
+context. If the model attempts to call it, the SDK rejects the call and returns
+a denial message. The model may then retry or choose a different approach. This
+costs tokens for each failed attempt, but allows for conditional restrictions
+(e.g., denying `run_command` only when the arguments match a dangerous pattern)
+and lets the model understand *why* access was refused.
+
+**Guideline**: Use `CapabilitiesConfig` to remove tools the agent should never
+need. Use policies for runtime guardrails where the decision depends on
+context, arguments, or user approval.
+
 ## Current Implementation
 
 The implementation is split across the following core files:

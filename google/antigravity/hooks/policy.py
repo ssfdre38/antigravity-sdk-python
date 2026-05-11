@@ -23,6 +23,24 @@ a priority-based model where specificity and safety determine precedence:
 
 Within each priority group, first match wins, enabling short-circuit evaluation.
 
+Policy Denial vs. Disabling Tools:
+
+  Policies operate at the hook layer: a denied tool is still *visible* to the
+  model in its tool list. If the model calls a policy-denied tool, the SDK
+  rejects the call and returns a denial message. The model may then retry or
+  choose another approach, but each attempt costs tokens.
+
+  To remove a tool from the model's context entirely — so it never sees the
+  tool and never wastes tokens on it — use ``CapabilitiesConfig.disabled_tools``
+  (or ``enabled_tools``) instead.
+
+  **Use policies** when the restriction is conditional or context-dependent
+  (e.g., denying ``run_command`` only for dangerous arguments, or requiring
+  user approval for certain operations).
+
+  **Use CapabilitiesConfig** when the tool is simply irrelevant to the agent's
+  purpose and should not appear in its context at all.
+
 Usage:
   from google.antigravity.hooks import policy
 

@@ -255,14 +255,36 @@ class BuiltinTools(str, enum.Enum):
 class CapabilitiesConfig(pydantic.BaseModel):
   """General agent capability configuration.
 
+  Disabling vs. Denying Tools:
+
+    ``enabled_tools`` / ``disabled_tools`` control which tools the harness
+    *exposes* to the model. A disabled tool is stripped from the model's
+    context entirely — the model never sees it, never wastes tokens
+    considering it, and never attempts to call it. Use these fields when
+    a tool is irrelevant to the agent's purpose.
+
+    By contrast, the policy system (``hooks.policy.deny()``) leaves a tool
+    visible in the model's context but rejects the call at runtime. The
+    model may still attempt to invoke a policy-denied tool, at which point
+    the SDK returns a denial message. This costs tokens and may cause
+    retries, but it allows the model to understand *why* access was
+    refused, which can be useful for adaptive agents.
+
+    **Guideline**: Prefer ``disabled_tools`` / ``enabled_tools`` for tools
+    the agent should never use. Use ``policy.deny()`` for conditional or
+    context-dependent restrictions (e.g., blocking ``run_command`` only
+    when the arguments match a dangerous pattern).
+
   Attributes:
     enable_subagents: Whether the agent can spawn and delegate to sub-agents.
     enabled_tools: Explicit allowlist of builtin tools to enable. Mutually
       exclusive with disabled_tools. When None, the harness defaults are used
-      (all tools enabled).
+      (all tools enabled). Disabled tools are removed from the model's context,
+      saving tokens and preventing the model from even considering them.
     disabled_tools: Explicit denylist of builtin tools to disable. Mutually
       exclusive with enabled_tools. When None, the harness defaults are used
-      (all tools enabled).
+      (all tools enabled). Disabled tools are removed from the model's context,
+      saving tokens and preventing the model from even considering them.
     compaction_threshold: Token count after which the context window may be
       compacted. When None, the backend's default is used.
     image_model: The model to use for image generation. Defaults to
