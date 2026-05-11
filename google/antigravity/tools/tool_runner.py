@@ -29,7 +29,6 @@ injectable parameters so the model never sees them.
 """
 
 import asyncio
-import collections.abc
 import functools
 import inspect
 from typing import Any, Callable
@@ -101,7 +100,7 @@ def _make_public_callable(
   return _proxy
 
 
-class ToolWithSchema(collections.abc.Callable):
+class ToolWithSchema:
   """Wrapper for callables with an explicit JSON Schema."""
 
   def __init__(self, fn: Callable[..., Any], input_schema: dict[str, Any]):
