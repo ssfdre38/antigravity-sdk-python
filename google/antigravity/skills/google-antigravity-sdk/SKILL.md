@@ -51,6 +51,7 @@ relevant information.
 -   If the user needs to monitor costs, track token usage (including thinking
     tokens), or build custom audit logs for advanced monitoring, read
     `references/observability.md`.
+-   If the user needs to see a list of built-in tools and understand their default state, read `references/built_in_tools.md`.
 
 ### Examples
 
