@@ -26,7 +26,9 @@ import os
 
 from google.antigravity import types
 from google.antigravity import Agent, LocalAgentConfig
-from google.antigravity.examples.resources import mcp_server
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from resources import mcp_server
 
 
 async def mcp_stdio() -> None:
