@@ -63,16 +63,16 @@ fi
 
 PROJECT_DIR="$(pwd)"
 
-# --- Python 3.13 via pyenv (pre-installed on the Kokoro image) ---
-echo "--- Setting up Python 3.13 ---"
+# --- Python 3.10 via pyenv (pre-installed on the Kokoro image) ---
+echo "--- Setting up Python 3.10 ---"
 eval "$(pyenv init -)"
-pyenv install -s 3.13
-pyenv global 3.13
+pyenv install -s 3.10
+pyenv global 3.10
 python3 --version
 
 # --- Read version from pyproject.toml if not set ---
 if [[ -z "${VERSION}" ]]; then
-  VERSION=$(python3 -I -c "import tomllib, pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+  VERSION=$(sed -n '/^\[project\]/,/^\[/p' pyproject.toml | grep -E '^version\s*=' | cut -d'"' -f2)
 fi
 
 echo "=== Google Antigravity SDK Release v${VERSION} ==="
