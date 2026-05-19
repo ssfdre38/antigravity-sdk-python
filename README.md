@@ -282,6 +282,12 @@ For more detailed documentation on specific components, see:
 -   [Tools](google/antigravity/tools/README.md) — In-process tool execution.
 -   [Triggers](google/antigravity/triggers/README.md) — Background tasks and external events.
 
+## Community SDKs
+
+Explore community-maintained ports and SDKs for the Antigravity platform:
+
+- **[Antigravity SDK for C# (.NET)](https://github.com/ssfdre38/antigravity-sdk-csharp)**: A high-fidelity, idiomatic .NET 10 port of the Antigravity SDK, enabling native agent orchestration and custom tool registration for the C# ecosystem.
+
 ## License
 
 [Apache License 2.0](LICENSE)
